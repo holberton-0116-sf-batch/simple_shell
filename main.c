@@ -16,11 +16,10 @@
  */
 
 int main(int argc, char **argv, char **env) {
- 
+
         pid_t pid;
         int status;
-	char c;
-	char **exec_argv;
+        char *exec_argv[] = {NULL, NULL, NULL};
 
         if (argc != 1) {
 		return 1;
@@ -29,9 +28,8 @@ int main(int argc, char **argv, char **env) {
 	print_char('$');
 	print_char(' ');
 
-	exec_argv = string_split(read(0, &c, 1), ' '); /* read the commands with parameters */
-
-	exec_argv[0] = concat_strings("/bin/", exec_argv[0]); /* add path for convenience */
+	exec_argv[0] = concat_strings("/bin/", argv[1]); /* add path for convenience */
+        exec_argv[1] = argv[2];
 
         /* Test */
         printf("the string is: %s\n", argv[2]);
@@ -89,15 +87,15 @@ char *concat_strings(char *s1, char *s2)
 
 int str_len(char *str)
 {
-  int i;			/* i used as a counter */
+        int i;			/* i used as a counter */
 
-  i = 0;			/* initialize at 0 */
+        i = 0;			/* initialize at 0 */
 
-  while (*str != '\0') 		/* while string isn't over */
-    {
-      i++;			/* increase counter */
-      str++;			/* pointer arithmetic for next char */
-    }
+        while (*str != '\0') 		/* while string isn't over */
+        {
+                i++;			/* increase counter */
+                str++;			/* pointer arithmetic for next char */
+        }
 
-  return i;
+        return i;
 }
