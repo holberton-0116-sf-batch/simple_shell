@@ -21,7 +21,7 @@ int main(int argc, char **argv, char **env) {
         int status;
 
         if (argc != 3) {
-                return (1);
+                return 1;
         }
 
 	exec_argv[0] = cmd_with_path(argv[1]);
@@ -33,7 +33,7 @@ int main(int argc, char **argv, char **env) {
 
         if ((pid = fork()) == -1) {
                 perror("fork");
-                return(1);
+                return 1;
         } else if (pid == 0) {
                 execve(exec_argv[0], exec_argv, env);
         } else {
@@ -41,7 +41,7 @@ int main(int argc, char **argv, char **env) {
                 printf("Child process terminated.\n");
         }
 
-        return(0);
+        return 0;
 }
 
 /*
@@ -54,18 +54,17 @@ int main(int argc, char **argv, char **env) {
 char *cmd_with_path(char *cmd)
 {
         char *path;
-        int len = 4;
+        int len = 5;
 
         for(; cmd[len] != '\0'; ++len);
 
         path = malloc(sizeof(char) * len);
 
-        if (path != NULL) {
-                path = concat_strings("/bin/", cmd, path);
-                return(path);
-        } else {
-                return("Not enough memory allocated.");
-        }
+	if (path == NULL) {
+		return "Not enough memory allocated.";
+	}
+        
+	return concat_strings("/bin/", cmd, path);
 }
 
 /*
@@ -91,5 +90,5 @@ char *concat_strings(char *s1, char *s2, char *p)
                 ++j;
         }
 
-        return (p);
+        return p;
 }
