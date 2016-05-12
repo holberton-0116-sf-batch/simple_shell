@@ -15,7 +15,7 @@
  */
 
 int main(int argc, char **argv, char **env) {
-
+ 
         pid_t pid;
         char *exec_argv[] = {NULL, NULL, NULL};
         int status;
@@ -24,12 +24,13 @@ int main(int argc, char **argv, char **env) {
                 return 1;
         }
 
-	exec_argv[0] = cmd_with_path(argv[1]);
+	exec_argv[0] = concat_strings("/bin/", argv[1]);
         exec_argv[1] = argv[2];
 
         /* Test */
         printf("the string is: %s\n", argv[2]);
         printf("the command is: %s\n", argv[1]);
+	printf("concat test: %s\n", concat_strings("hello", "world"));
 
         if ((pid = fork()) == -1) {
                 perror("fork");
@@ -45,50 +46,51 @@ int main(int argc, char **argv, char **env) {
 }
 
 /*
- * cmd_with_path() - Generates a string with the path to the command the user
- * entered.
- * @cmd: The command the user entered.
- *
- * Return: The path to the command, or error message if mallocation fails.
- */
-char *cmd_with_path(char *cmd)
-{
-        char *path;
-        int len = 5;
-
-        for(; cmd[len] != '\0'; ++len);
-
-        path = malloc(sizeof(char) * len);
-
-	if (path == NULL) {
-		return "Not enough memory allocated.";
-	}
-        
-	return concat_strings("/bin/", cmd, path);
-}
-
-/*
  * concat_strings() - Take two strings and concatenate them.
  * @s1: The first string.
  * @s2: The second string.
- * @p: The allocated mallocated pointer.
  *
  * Return: The pointer with the concatentated string.
  */
-char *concat_strings(char *s1, char *s2, char *p)
+char *concat_strings(char *s1, char *s2)
 {
-        int i;
-        int j = 0;
+        int i, j, len;
+	char *p;
 
-        for (i = 0; s1[i] != '\0'; ++i) {
+	i = 0;
+
+	while (s1[i] != '\0') {
+		i++;
+	}
+
+	j = 0;
+
+	while (s2[j] != '\0') {
+		j++;
+	}
+
+	len = i + j; 		/* here we have the length of both strings */
+
+	p = malloc(sizeof(char) * len + 1); /* allocate memory */
+
+	if (p == NULL) {		/* memory allocation check */
+		perror("malloc");
+		return "Not enough memory allocated.";
+	}
+
+	j = 0;
+
+        for (i = 0; s1[i] != '\0'; ++i) { /* here we copy the first string onto p */
                 p[j] = s1[i];
                 ++j;
         }
 
-        for (i = 0; s2[i] != '\0'; ++i) {
+        for (i = 0; s2[i] != '\0'; ++i) { /* here we append the 2nd string onto p */
                 p[j] = s2[i];
                 ++j;
         }
+
+	p[j] = '\0';		/* append null character at the end */
 
         return p;
 }
