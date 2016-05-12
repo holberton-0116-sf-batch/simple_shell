@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "header.h"
+#include "libshell/libshell.h"
 
 /*
  * Takes arguments from command line and locates them in PATH.
@@ -17,15 +18,20 @@
 int main(int argc, char **argv, char **env) {
  
         pid_t pid;
-        char *exec_argv[] = {NULL, NULL, NULL};
         int status;
+	char c;
+	char **exec_argv;
 
-        if (argc != 3) {
-                return 1;
+        if (argc != 1) {
+		return 1;
         }
 
-	exec_argv[0] = concat_strings("/bin/", argv[1]);
-        exec_argv[1] = argv[2];
+	print_char('$');
+	print_char(' ');
+
+	exec_argv = string_split(read(0, &c, 1), ' '); /* read the commands with parameters */
+
+	exec_argv[0] = concat_strings("/bin/", exec_argv[0]); /* add path for convenience */
 
         /* Test */
         printf("the string is: %s\n", argv[2]);
