@@ -54,24 +54,10 @@ int main(int argc, char **argv, char **env) {
  */
 char *concat_strings(char *s1, char *s2)
 {
-        int i, j, len;
+        int i, j;
 	char *p;
 
-	i = 0;
-
-	while (s1[i] != '\0') {
-		i++;
-	}
-
-	j = 0;
-
-	while (s2[j] != '\0') {
-		j++;
-	}
-
-	len = i + j; 		/* here we have the length of both strings */
-
-	p = malloc(sizeof(char) * len + 1); /* allocate memory */
+	p = malloc( sizeof(char) * ( str_len(s1) + str_len(s2) ) + 1 ); /* allocate memory */
 
 	if (p == NULL) {		/* memory allocation check */
 		perror("malloc");
