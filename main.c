@@ -16,7 +16,6 @@
 
 int main(int argc, char **argv, char **env) {
 
-	char *path;
         pid_t pid;
         char *exec_argv[] = {NULL, NULL, NULL};
         int status;
@@ -25,8 +24,7 @@ int main(int argc, char **argv, char **env) {
                 return (1);
         }
 
-        path = cmd_with_path(argv[1]);
-	exec_argv[0] = path;
+	exec_argv[0] = cmd_with_path(argv[1]);
         exec_argv[1] = argv[2];
 
         /* Test */
