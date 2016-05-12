@@ -15,7 +15,6 @@
  */
 
 int main(int argc, char **argv, char **env) {
-
 	char *path;
         pid_t pid;
         char *exec_argv[] = {NULL, NULL, NULL};
@@ -25,7 +24,7 @@ int main(int argc, char **argv, char **env) {
                 return (1);
         }
 
-        path = get_path(argv[1]);
+        path = cmd_with_path(argv[1]);
 	exec_argv[0] = path;
         exec_argv[1] = argv[2];
 
@@ -47,13 +46,13 @@ int main(int argc, char **argv, char **env) {
 }
 
 /*
- * get_path() - Generates a string with the path to the command the user
+ * cmd_with_path() - Generates a string with the path to the command the user
  * entered.
  * @cmd: The command the user entered.
  *
  * Return: The path to the command, or error message if mallocation fails.
  */
-char *get_path(char *cmd)
+char *cmd_with_path(char *cmd)
 {
         char *path;
         int len = 4;
