@@ -77,21 +77,28 @@ char *get_path(char *cmd)
         }
 }
 
-
+/*
+ * concat_strings() - Take two strings and concatenate them.
+ * @s1: The first string.
+ * @s2: The second string.
+ * @p: The allocated mallocated pointer.
+ *
+ * Return: The pointer with the concatentated string.
+ */
 char *concat_strings(char *s1, char *s2, char *p)
 {
-  int i;
-  int j = 0;
+        int i;
+        int j = 0;
 
-  for (i = 0; s1[i] != '\0'; ++i) {
-    p[j] = s1[i];
-    ++j;
-  }
+        for (i = 0; s1[i] != '\0'; ++i) {
+                p[j] = s1[i];
+                ++j;
+        }
 
-  for (i = 0; s2[i] != '\0'; ++i) {
-    p[j] = s2[i];
-    ++j;
-  }
+        for (i = 0; s2[i] != '\0'; ++i) {
+                p[j] = s2[i];
+                ++j;
+        }
 
-  return (p);
+        return (p);
 }
