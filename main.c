@@ -25,9 +25,11 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
         int i = 0;
         char *exec_argv[] = {NULL, NULL, NULL};
 
-        if (argc =! 1) {
+        if (argc != 1) {
 		return 1;
         }
+
+        str = malloc( sizeof(char) * 10 );
 
         print_prompt();
 
@@ -107,7 +109,7 @@ int str_len(char *str)
         return i;
 }
 
-char *print_prompt(){
+int *print_prompt(){
         int i;
         char *prompt = "GreenShell$ ";
 
@@ -116,4 +118,5 @@ char *print_prompt(){
                 print_char(prompt[i]);
                 ++i;
         }
+        return 0;
 }
