@@ -4,7 +4,42 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "header.h"
-#include "libshell/libshell.h"
+
+int find_len(char *str) {
+  int i = 0;
+
+  /* Find the length of a string */
+  while (str[i] != '\0') {
+    i++;
+  }
+  return i;
+}
+
+char **string_split(char *str) {
+  int i, j, len;
+  int k = 0;
+  char **str_arr;
+  len = find_len(str);
+  str_arr = malloc(sizeof(char **) * 5);
+  if (str_arr == NULL) {
+    return (NULL);}
+  for (i = 0; i < 5; i++) { /* Allot memory for each char in the array */
+    str_arr[i] = malloc(sizeof(char) * 10);
+    if (str_arr[i] == NULL) {
+      return (NULL);}
+  }
+  for (i = 0; i < len; i++) { /* Assign decimals to the str_arr array */
+    if (str[i] == ' ' && str[i + 1] != ' ') {
+      if (str[i + 1] != '\0') {
+        k++;
+        j = 0;}}
+    if (str[i] != ' ') {
+      str_arr[k][j] = str[i];
+      j++;}
+  }
+  str_arr[k + 1] = NULL;
+  return (str_arr);
+}
 
 /*
  * Takes arguments from command line and locates them in PATH.
@@ -19,7 +54,13 @@ int main(int argc, char **argv, char **env) {
 
         pid_t pid;
         int status;
+        char c;
+        char *str;
+        char **str_arr;
+        int i = 0;
         char *exec_argv[] = {NULL, NULL, NULL};
+
+        str = malloc( sizeof(char) * 1000);
 
         if (argc != 1) {
 		return 1;
@@ -27,6 +68,16 @@ int main(int argc, char **argv, char **env) {
 
 	print_char('$');
 	print_char(' ');
+
+        while(read(0, &c, 1)) {
+                str[i] = c;
+                /* print_char(c); */
+                ++i;
+        }
+
+        str_arr = string_split(str);
+        printf("str is: %s\n", str);
+        printf("%s\n", str_arr[2]);
 
 	exec_argv[0] = concat_strings("/bin/", argv[1]); /* add path for convenience */
         exec_argv[1] = argv[2];
