@@ -22,9 +22,8 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
         char c;
         char *path_to_exec;
         char *raw_str;
-        char **arr;
         int i = 0;
-        char *exec_argv[] = {NULL, NULL, NULL};
+        char **exec_argv;
 
         if (argc != 1) {
 		return 1;
@@ -37,19 +36,14 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
         while(read(0, &c, 1)) {
                 if(c == '\n') {
                         raw_str[i] = '\0';
-                        i = 0;
-                        /* Delete */
-                        arr = string_split(raw_str, ' ');
-
-                        path_to_exec = find_path(arr[0], env);
-                        path_to_exec = concat_strings(path_to_exec, "/");
+                        exec_argv = string_split(raw_str, ' ');
+                        path_to_exec = "/bin/";
 
                         printf("The path to the exec is: %s\n", path_to_exec);
 
-                        exec_argv[0] = concat_strings(path_to_exec, arr[0]);
+                        exec_argv[0] = concat_strings(path_to_exec, exec_argv[0]);
 
                         printf("exec_argv[0]: %s\n", exec_argv[0]);
-                        exec_argv[1] = arr[1];
 
                         if ((pid = fork()) == -1) {
                                 perror("fork");
@@ -60,6 +54,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
                                 wait(&status);
                         }
                         print_prompt();
+                        i = 0;
                         read(0, &c, 1);
                 }
                 raw_str[i] = c;
