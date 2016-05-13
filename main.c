@@ -41,6 +41,9 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 
                         printf("The path to the exec is: %s\n", path_to_exec);
 
+			if ( strcmp(exec_argv[0], "exit") == 0)
+				return 0;
+
                         exec_argv[0] = concat_strings(path_to_exec, exec_argv[0]);
 
                         printf("exec_argv[0]: %s\n", exec_argv[0]);
@@ -85,7 +88,7 @@ char *find_path(char *command, char **env) {
         path_arr = string_split(path, ':');
 
         /* Increment through the path array to find the location of the program. */
-        for(i = 0; path_arr != NULL; ++i) {
+        for(i = 0; path_arr != '\0'; ++i) {
 
                 /* Open each directory. */
                 dir = opendir(path_arr[i]);
