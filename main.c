@@ -97,11 +97,11 @@ char *find_path(char *command, char **env) {
                 while((dir_search = readdir(dir)) != NULL) {
                         if (strcmp(dir_search->d_name, command) == 0) {
                                 printf("Found the program %s, in the directory %s\n", dir_search->d_name, path_arr[i]);
-                                break;
+				return path_arr[i];
                         }
                 }
         }
-        return path_arr[i];
+        return NULL;		/* return a string with only the '\0' character */
 }
 
 /*
