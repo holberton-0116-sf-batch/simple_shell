@@ -29,8 +29,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 		return 1;
         }
 
-	print_char('$');
-	print_char(' ');
+        print_prompt();
 
         while(read(0, &c, 1)) {
                 if(c == '\n') {
@@ -48,8 +47,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
                         } else {
                                 wait(&status);
                         }
-                        print_char('$');
-                        print_char(' ');
+                        print_prompt();
                         read(0, &c, 1);
                 }
                 str[i] = c;
@@ -107,4 +105,15 @@ int str_len(char *str)
         }
 
         return i;
+}
+
+char *print_prompt(){
+        int i;
+        char *prompt = "GreenShell$ ";
+
+        i = 0;
+        while (prompt[i] != '\0') {
+                print_char(prompt[i]);
+                ++i;
+        }
 }
