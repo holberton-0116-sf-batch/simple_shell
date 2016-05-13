@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "header.h"
+#include <dirent.h>
 #include "libshell/libshell.h"
 
 /*
@@ -14,32 +15,35 @@
  *
  * Return: 0 on success, 1 on failure.
  */
-
 int main(int argc, __attribute__((unused)) char **argv, char **env) {
 
         pid_t pid;
         int status;
         char c;
-        char *str;
-        char **arr;
+        char *path_to_exec;
+        char *raw_str;
         int i = 0;
-        char *exec_argv[] = {NULL, NULL, NULL};
+        char **exec_argv;
 
         if (argc != 1) {
 		return 1;
         }
 
-        str = malloc( sizeof(char) * 10 );
+        raw_str = malloc(sizeof(char) * (100 + 1));
 
         print_prompt();
 
         while(read(0, &c, 1)) {
                 if(c == '\n') {
-                        str[i] = '\0';
-                        i = 0;
-                        arr = string_split(str, ' ');
-                        exec_argv[0] = concat_strings("/bin/", arr[0]);
-                        exec_argv[1] = arr[1];
+                        raw_str[i] = '\0';
+                        exec_argv = string_split(raw_str, ' ');
+                        path_to_exec = "/bin/";
+
+                        printf("The path to the exec is: %s\n", path_to_exec);
+
+                        exec_argv[0] = concat_strings(path_to_exec, exec_argv[0]);
+
+                        printf("exec_argv[0]: %s\n", exec_argv[0]);
 
                         if ((pid = fork()) == -1) {
                                 perror("fork");
@@ -50,12 +54,51 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
                                 wait(&status);
                         }
                         print_prompt();
+                        i = 0;
                         read(0, &c, 1);
                 }
-                str[i] = c;
+                raw_str[i] = c;
                 ++i;
         }
         return 0;
+}
+
+char *find_path(char *command, char **env) {
+        DIR *dir;
+        struct dirent *dir_search;
+        char *path;
+        char **path_arr;
+        int i;
+
+        dir_search = malloc(sizeof(struct dirent));
+        path = malloc(sizeof(char) * (100 + 1));
+
+        /* Take the path variable and isolate it into a variable.
+         * PATH is the 8th element in the env array. The first absolute
+         * path begins at five chars in, hence [i + 5].
+         */
+        for(i = 0; env[8][i + 5] != '\0'; i++) {
+                path[i] = env[8][i + 5];
+        }
+
+        /* Split the path into an array for searching. */
+        path_arr = string_split(path, ':');
+
+        /* Increment through the path array to find the location of the program. */
+        for(i = 0; path_arr != NULL; ++i) {
+
+                /* Open each directory. */
+                dir = opendir(path_arr[i]);
+
+                /* Seach this directory for the program name. */
+                while((dir_search = readdir(dir)) != NULL) {
+                        if (strcmp(dir_search->d_name, command) == 0) {
+                                printf("Found the program %s, in the directory %s\n", dir_search->d_name, path_arr[i]);
+                                break;
+                        }
+                }
+        }
+        return path_arr[i];
 }
 
 /*
@@ -119,4 +162,19 @@ int *print_prompt(){
                 ++i;
         }
         return 0;
+}
+
+int strcmp(char *s1, char *s2)
+{
+  int i = 0;
+  int j = 0;
+  for ( ; s1[i] != '\0'; i++)
+  {
+  	if (s1[j] != s2[j]) /* if chars are different, break */
+	  {
+	    break;
+	  }
+	  j++;
+  }
+  return(s1[j] - s2[j]); /* return difference in chars */
 }
