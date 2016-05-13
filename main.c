@@ -6,8 +6,6 @@
 #include "header.h"
 #include "libshell/libshell.h"
 
-#define BUFFER_SIZE 32
-
 /*
  * Takes arguments from command line and locates them in PATH.
  * @cmd: The command entered by the user.
@@ -19,68 +17,38 @@
 
 int main(int argc, char **argv, char **env) {
  
-  /* 
-   * Arguments to be passed to execve() function are stored here. exec_argv[0]
-   * will be the full path to the program. All following exec_argv[i] will be
-   * arguments to the command.
-   */
-  char **exec_argv;
+        pid_t pid;
+        int status;
+	char c;
+	char **exec_argv;
 
-  /* 
-   * This string will be obtained by read() from stdin and will be parsed by
-   * string_split() into char **exec_argv (array of strings).
-   */
-  char rawstring[BUFFER_SIZE];
+        if (argc != 1) {
+		return 1;
+        }
 
-  /*
-   * On success, process ID of the child process is stored here. If fork()
-   * returns an error, its error will be stored here (-1).
-   */
-  pid_t pid;
+	print_char('$');
+	print_char(' ');
 
-  /* The status of a child process change will be stored here by wait() */
-  int status;
+	exec_argv = string_split(read(0, &c, 1), ' '); /* read the commands with parameters */
 
-  char c;
-  int i;
+	exec_argv[0] = concat_strings("/bin/", exec_argv[0]); /* add path for convenience */
 
-  if (argc != 1) { 		/* usage: command with no arguments */
-	  return 1;
-  }
+        /* Test */
+        printf("the string is: %s\n", argv[2]);
+        printf("the command is: %s\n", argv[1]);
+	printf("concat test: %s\n", concat_strings("hello", "world"));
 
-  /* draw the command prompt */
-  print_char('$');
-  print_char(' ');
+        if ((pid = fork()) == -1) {
+                perror("fork");
+                return 1;
+        } else if (pid == 0) {
+                execve(exec_argv[0], exec_argv, env);
+        } else {
+                wait(&status);
+                printf("Child process terminated.\n");
+        }
 
-
-  i = 0;
-  while (read(0, &c, 1) && c != '\n') {
-	  rawstring[i] = c;
-	  i++;
-  }
-
-  /* read the commands with parameters */
-  exec_argv = string_split(rawstring, ' ');
-
-  /* add path for convenience */
-  exec_argv[0] = concat_strings("/bin/", exec_argv[0]);
-
-  /* Test */
-  printf("the string is: %s\n", argv[2]);
-  printf("the command is: %s\n", argv[1]);
-  printf("concat test: %s\n", concat_strings("hello", "world"));
-
-  if ((pid = fork()) == -1) {
-	  perror("fork");
-	  return 1;
-  } else if (pid == 0) {
-	  execve(exec_argv[0], exec_argv, env);
-  } else {
-	  wait(&status);
-	  printf("Child process terminated.\n");
-  }
-
-  return 0;
+        return 0;
 }
 
 /*
