@@ -7,6 +7,8 @@
 #include <dirent.h>
 #include "libshell/libshell.h"
 
+#define BUFFER_SIZE 100
+
 /*
  * Takes arguments from command line and locates them in PATH.
  * @cmd: The command entered by the user.
@@ -29,7 +31,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 		return 1;
         }
 
-        raw_str = malloc(sizeof(char) * (100 + 1));
+        raw_str = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 
         print_prompt();
 
@@ -38,15 +40,20 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
                         raw_str[i] = '\0';
                         exec_argv = string_split(raw_str, ' ');
 
-			if (path_to_exec = find_path(exec_argv[0], env) == NULL) {
+			if ( strcmp(exec_argv[0], "exit") == 0) {
+				if (exec_argv[1] != NULL)
+					return atoi(exec_argv[1]);
+				return 0;
+			}
+
+			if ((path_to_exec = find_path(exec_argv[0], env)) == NULL) {
 				printf("Command not found.\n");
+				return 0;
 			}
 
                         printf("The path to the exec is: %s\n", path_to_exec);
 
-			if ( strcmp(exec_argv[0], "exit") == 0)
-				return 0;
-
+			path_to_exec = concat_strings(path_to_exec, "/"); /* add a slash */
                         exec_argv[0] = concat_strings(path_to_exec, exec_argv[0]);
 
                         printf("exec_argv[0]: %s\n", exec_argv[0]);
@@ -77,7 +84,7 @@ char *find_path(char *command, char **env) {
         int i;
 
         dir_search = malloc(sizeof(struct dirent));
-        path = malloc(sizeof(char) * (100 + 1));
+        path = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 
         /* Take the path variable and isolate it into a variable.
          * PATH is the 8th element in the env array. The first absolute
@@ -104,6 +111,7 @@ char *find_path(char *command, char **env) {
                         }
                 }
         }
+
         return NULL;		/* return a string with only the '\0' character */
 }
 
