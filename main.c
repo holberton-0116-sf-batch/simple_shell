@@ -37,7 +37,10 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
                 if(c == '\n') {
                         raw_str[i] = '\0';
                         exec_argv = string_split(raw_str, ' ');
-                        path_to_exec = "/bin/";
+
+			if (path_to_exec = find_path(exec_argv[0], env) == NULL) {
+				printf("Command not found.\n");
+			}
 
                         printf("The path to the exec is: %s\n", path_to_exec);
 
