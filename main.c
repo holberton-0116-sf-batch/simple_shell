@@ -21,58 +21,34 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 
         pid_t pid;
         int status;
-        char c;
-        char *path_to_exec;
+        /*char *path_to_exec;*/
         char *raw_str;
-        int i = 0;
         char **exec_argv;
 
         if (argc != 1) {
 		return 1;
         }
 
-        raw_str = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+        while (1) {
+                print_prompt();
+                raw_str = read_line(0);
+                exec_argv = string_split(raw_str, ' ');
 
-        print_prompt();
+                if (strcmp(exec_argv[0], "exit") == 0)
+                        return 0;
 
-        while(read(0, &c, 1)) {
-                if(c == '\n') {
-                        raw_str[i] = '\0';
-                        exec_argv = string_split(raw_str, ' ');
+                exec_argv[0] = concat_strings("/bin/",exec_argv[0]);
 
-			if ( strcmp(exec_argv[0], "exit") == 0) {
-				if (exec_argv[1] != NULL)
-					return atoi(exec_argv[1]);
-				return 0;
-			}
-
-			if ((path_to_exec = find_path(exec_argv[0], env)) == NULL) {
-				printf("Command not found.\n");
-				return 0;
-			}
-
-                        printf("The path to the exec is: %s\n", path_to_exec);
-
-			path_to_exec = concat_strings(path_to_exec, "/"); /* add a slash */
-                        exec_argv[0] = concat_strings(path_to_exec, exec_argv[0]);
-
-                        printf("exec_argv[0]: %s\n", exec_argv[0]);
-
-                        if ((pid = fork()) == -1) {
-                                perror("fork");
-                                return 1;
-                        } else if (pid == 0) {
-                                execve(exec_argv[0], exec_argv, env);
-                        } else {
-                                wait(&status);
-                        }
-                        print_prompt();
-                        i = 0;
-                        read(0, &c, 1);
+                if ((pid = fork()) == -1) {
+                        perror("fork");
+                        return 1;
+                } else if (pid == 0) {
+                        execve(exec_argv[0], exec_argv, env);
+                } else {
+                        wait(&status);
                 }
-                raw_str[i] = c;
-                ++i;
         }
+
         return 0;
 }
 
