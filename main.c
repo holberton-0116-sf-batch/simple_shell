@@ -24,6 +24,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
         /*char *path_to_exec;*/
         char *raw_str;
         char **exec_argv;
+	int exec_size; 		/* how many strings in the array */
 
         if (argc != 1) {
 		return 1;
@@ -33,6 +34,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
                 print_prompt();
                 raw_str = read_line(0);
                 exec_argv = string_split(raw_str, ' ');
+		free(raw_str); 	/* frees the memory allocated in read_line() */
 
                 if (strcmp(exec_argv[0], "exit") == 0)
                         return 0;
@@ -46,6 +48,8 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
                         execve(exec_argv[0], exec_argv, env);
                 } else {
                         wait(&status);
+			exec_size = grid_size(exec_argv); /* how many strings in the array */
+			printf("Size of exec_argv: %d\n", exec_size);
                 }
         }
 
@@ -58,13 +62,29 @@ int str_len(char *str)
 
         i = 0;			/* initialize at 0 */
 
-        while (*str != '\0') 		/* while string isn't over */
+        while (*str != '\0')	/* while string isn't over */
         {
-                i++;			/* increase counter */
-                str++;			/* pointer arithmetic for next char */
+                i++;		/* increase counter */
+                str++;		/* pointer arithmetic for next char */
         }
 
         return i;
+}
+
+/* determines size of a grid of characters (array of strings) */
+int grid_size(char **grid)
+{
+	int i;
+
+	i = 0;
+
+        while (*grid != NULL) 	/* until there is no pointer */
+        {
+                i++;	     /* increase counter */
+                grid++;     /* pointer arithmetic for next pointer */
+        }
+
+	return i;
 }
 
 int *print_prompt(){
@@ -81,15 +101,15 @@ int *print_prompt(){
 
 int strcmp(char *s1, char *s2)
 {
-  int i = 0;
-  int j = 0;
-  for ( ; s1[i] != '\0'; i++)
-  {
-  	if (s1[j] != s2[j]) /* if chars are different, break */
-	  {
-	    break;
-	  }
-	  j++;
-  }
-  return(s1[j] - s2[j]); /* return difference in chars */
+	int i = 0;
+	int j = 0;
+	for ( ; s1[i] != '\0'; i++)
+	{
+		if (s1[j] != s2[j]) /* if chars are different, break */
+		{
+			break;
+		}
+		j++;
+	}
+	return(s1[j] - s2[j]); /* return difference in chars */
 }

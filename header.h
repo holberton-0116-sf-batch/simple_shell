@@ -5,3 +5,5 @@ int strcmp(char *, char *);
 int *print_prompt();
 void print_env(char **);
 char *find_path(char *, char **);
+void free_grid(char **grid, int n);
+int grid_size(char **grid);
