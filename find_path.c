@@ -16,6 +16,9 @@
  * @env: The environment with the PATH variable.
  *
  * Return: The program if it exists, and NULL if the program is not found.
+ * For example, if the cmd variable were the string "ls" and this program
+ * exists in the /bin directory, this function will return the entire path
+ * to that program: the string "/bin/ls".
  */
 char *find_path(char *cmd, char **env) {
         DIR *dir;
