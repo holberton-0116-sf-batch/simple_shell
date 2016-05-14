@@ -27,17 +27,14 @@ char *find_path(char *cmd, char **env) {
         char **arr;
         int i;
 
-        dir_search = malloc(sizeof(struct dirent));
-        path = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-
-        /* Take the path variable and isolate it into a variable.
-         * PATH is the 8th element in the env array. The first absolute
-         * path begins at five chars in, hence [i + 5].
+        /*
+         * Retrieve the value of the env variable PATH, then split it into
+         * an array based on the colon separator. Free memory allocated in
+         * get_env_var function.
          */
-        for(i = 0; env[8][i + 5] != '\0'; i++) {
-                path[i] = env[8][i + 5];
-        }
+        path = get_env_var("PATH", env);
         arr = string_split(path, ':');
+        free(path);
 
         /* Increment through the path array, searching within dirs. */
         for(i = 0; arr[i] != '\0'; ++i) {
@@ -50,4 +47,42 @@ char *find_path(char *cmd, char **env) {
                 }
         }
         return NULL;
+}
+
+/*
+ * get_env_var() - Takes an environmental variable and searches for its
+ * existence. If found it will return the value of that variable.
+ * @var: The environmental variable to be found (e.g., "PATH");
+ * @env: The parent process environment.
+ *
+ * Return: The value of the variable, if it exists. NULL if it does
+ * not exist.
+ */
+char *get_env_var(char *var, char **env) {
+        char *var_str;
+        char *val;
+        int i, j, len, loc;
+
+        var_str = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+        val = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+
+        len = str_len(var);
+
+        /* Find the location of the variable in the env array. */
+        for(loc = 0; env[loc] != '\0'; loc++) {
+                for(j = 0; j < len; ++j) {
+                        var_str[j] = env[loc][j];
+                } if(strcmp(var, var_str) == 0)
+                        break;
+                if(env[loc + 1] == '\0')
+                        return NULL;
+        }
+
+        free(var_str);
+
+        /* Store the value of the env variable to be returned. */
+        for(i = 0; env[loc][i + (len + 1)] != '\0'; i++) {
+                val[i] = env[loc][i + (len + 1)];
+        }
+        return val;
 }
