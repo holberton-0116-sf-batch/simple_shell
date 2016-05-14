@@ -19,41 +19,42 @@
  */
 int main(int argc, __attribute__((unused)) char **argv, char **env) {
 
-        pid_t pid;
-        int status;
-        /*char *path_to_exec;*/
-        char *raw_str;
-        char **exec_argv;
+	pid_t pid;
+	int status;
+	/*char *path_to_exec;*/
+	char *raw_str;
+	char **exec_argv;
 	int exec_size; 		/* how many strings in the array */
 
-        if (argc != 1) {
+	if (argc != 1) {
 		return 1;
-        }
+	}
+  
 
-        while (1) {
-                print_prompt();
-                raw_str = read_line(0);
-                exec_argv = string_split(raw_str, ' ');
-		free(raw_str); 	/* frees the memory allocated in read_line() */
+	print_prompt();
+	raw_str = read_line(0);
+	exec_argv = string_split(raw_str, ' ');
+	free(raw_str); 	/* frees the memory allocated in read_line() */
+	exec_size = grid_size(exec_argv); /* how many strings in the array */
+	printf("Size of exec_argv: %d\n", exec_size);
 
-                if (strcmp(exec_argv[0], "exit") == 0)
-                        return 0;
+	/* memory leak is happening inside this if statement */
+	if (strcmp(exec_argv[0], "exit") != 0) {
+		exec_argv[0] = concat_strings("/bin/", exec_argv[0]);
 
-                exec_argv[0] = concat_strings("/bin/",exec_argv[0]);
+		if ((pid = fork()) == -1) {
+			perror("fork");
+			return 1;
+		} else if (pid == 0) {
+			execve(exec_argv[0], exec_argv, env);
+		} else {
+			wait(&status);
+		}
+	}
 
-                if ((pid = fork()) == -1) {
-                        perror("fork");
-                        return 1;
-                } else if (pid == 0) {
-                        execve(exec_argv[0], exec_argv, env);
-                } else {
-                        wait(&status);
-			exec_size = grid_size(exec_argv); /* how many strings in the array */
-			printf("Size of exec_argv: %d\n", exec_size);
-                }
-        }
+	free_grid(exec_argv, exec_size);
 
-        return 0;
+	return 0;
 }
 
 int str_len(char *str)
