@@ -7,6 +7,8 @@
 #include <dirent.h>
 #include "libshell/libshell.h"
 
+#define BUFFER_SIZE 100
+
 /*
  * Takes arguments from command line and locates them in PATH.
  * @cmd: The command entered by the user.
@@ -16,7 +18,6 @@
  * Return: 0 on success, 1 on failure.
  */
 int main(int argc, __attribute__((unused)) char **argv, char **env) {
-
         pid_t pid;
         int status;
         char c;
@@ -24,117 +25,57 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
         char *raw_str;
         int i = 0;
         char **exec_argv;
+        char *path_to_home;
+        path_to_home = get_env_var("HOME", env);
 
         if (argc != 1) {
 		return 1;
         }
 
-        raw_str = malloc(sizeof(char) * (100 + 1));
+        raw_str = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 
         print_prompt();
 
         while(read(0, &c, 1)) {
                 if(c == '\n') {
+
                         raw_str[i] = '\0';
                         exec_argv = string_split(raw_str, ' ');
-                        path_to_exec = "/bin/";
+                        if (strcmp(exec_argv[0], "exit") == 0) {
+				if (exec_argv[1] != NULL)
+					return atoi(exec_argv[1]);
+				return 0;
 
-                        printf("The path to the exec is: %s\n", path_to_exec);
+			} if ((path_to_exec = find_path(exec_argv[0], env)) != NULL) {
 
-                        exec_argv[0] = concat_strings(path_to_exec, exec_argv[0]);
-
-                        printf("exec_argv[0]: %s\n", exec_argv[0]);
-
-                        if ((pid = fork()) == -1) {
-                                perror("fork");
-                                return 1;
-                        } else if (pid == 0) {
-                                execve(exec_argv[0], exec_argv, env);
-                        } else {
-                                wait(&status);
+                                if ((pid = fork()) == -1) {
+                                        perror("fork");
+                                        return 1;
+                                } else if (pid == 0) {
+                                        execve(path_to_exec, exec_argv, env);
+                                } else {
+                                        wait(&status);
+                                }
+                                print_prompt();
+                                i = 0;
+                                read(0, &c, 1);
+                        } if (path_to_exec == NULL) {
+                                if (strcmp(exec_argv[0], "cd") == 0) {
+                                        if(exec_argv[1] == NULL) {
+                                                ch_dir(path_to_home);
+                                        } else if(exec_argv[1] != NULL) {
+                                                ch_dir(exec_argv[1]);
+                                        }
+                                }
+                                print_prompt();
+                                i = 0;
+                                read(0, &c, 1);
                         }
-                        print_prompt();
-                        i = 0;
-                        read(0, &c, 1);
                 }
                 raw_str[i] = c;
                 ++i;
         }
         return 0;
-}
-
-char *find_path(char *command, char **env) {
-        DIR *dir;
-        struct dirent *dir_search;
-        char *path;
-        char **path_arr;
-        int i;
-
-        dir_search = malloc(sizeof(struct dirent));
-        path = malloc(sizeof(char) * (100 + 1));
-
-        /* Take the path variable and isolate it into a variable.
-         * PATH is the 8th element in the env array. The first absolute
-         * path begins at five chars in, hence [i + 5].
-         */
-        for(i = 0; env[8][i + 5] != '\0'; i++) {
-                path[i] = env[8][i + 5];
-        }
-
-        /* Split the path into an array for searching. */
-        path_arr = string_split(path, ':');
-
-        /* Increment through the path array to find the location of the program. */
-        for(i = 0; path_arr != NULL; ++i) {
-
-                /* Open each directory. */
-                dir = opendir(path_arr[i]);
-
-                /* Seach this directory for the program name. */
-                while((dir_search = readdir(dir)) != NULL) {
-                        if (strcmp(dir_search->d_name, command) == 0) {
-                                printf("Found the program %s, in the directory %s\n", dir_search->d_name, path_arr[i]);
-                                break;
-                        }
-                }
-        }
-        return path_arr[i];
-}
-
-/*
- * concat_strings() - Take two strings and concatenate them.
- * @s1: The first string.
- * @s2: The second string.
- *
- * Return: The pointer with the concatentated string.
- */
-char *concat_strings(char *s1, char *s2)
-{
-        int i, j;
-	char *p;
-
-	p = malloc( sizeof(char) * ( str_len(s1) + str_len(s2) ) + 1 ); /* allocate memory */
-
-	if (p == NULL) {		/* memory allocation check */
-		perror("malloc");
-		return "Not enough memory allocated.";
-	}
-
-	j = 0;
-
-        for (i = 0; s1[i] != '\0'; ++i) { /* here we copy the first string onto p */
-                p[j] = s1[i];
-                ++j;
-        }
-
-        for (i = 0; s2[i] != '\0'; ++i) { /* here we append the 2nd string onto p */
-                p[j] = s2[i];
-                ++j;
-        }
-
-	p[j] = '\0';		/* append null character at the end */
-
-        return p;
 }
 
 int str_len(char *str)
