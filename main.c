@@ -46,11 +46,11 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 			return 1;
 		} else if (pid == 0) {
 			exec_argv[0] = concat_strings("/bin/", exec_argv[0]);
-			if (execve(exec_argv[0], exec_argv, env) == -1)
-			{
-				perror("execve");
-				return 2;
-			}
+			execve(exec_argv[0], exec_argv, env);
+			perror("execve");
+			free_grid(exec_argv, exec_size);
+			return -1; /* child process returns this */
+		
 		} else {
 			wait(&status);
 		}
