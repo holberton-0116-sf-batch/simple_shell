@@ -26,10 +26,9 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 	char **exec_argv;
 	int exec_size; 		/* how many strings in the array */
 
-	if (argc != 1) {
+	if (argc != 1) { 	/* usage */
 		return 1;
 	}
-  
 
 	print_prompt();
 	raw_str = read_line(0);
