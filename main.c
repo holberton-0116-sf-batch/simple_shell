@@ -40,7 +40,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 		if (str_cmp(exec_argv[0], "exit") == 0)
 			break;
 		if (str_cmp(exec_argv[0], "cd") == 0) {
-			ch_dir(exec_argv[1]);
+			ch_dir(exec_argv[1], env);
 		} else if ((pid = fork()) == -1) {
 			perror("fork");
 			return 1;
