@@ -1,7 +1,7 @@
 int print_char(char);
 char *concat_strings(char *, char *);
 int str_len(char *);
-int strcmp(char *, char *);
+int str_cmp(char *, char *);
 int *print_prompt();
 void print_env(char **);
 char *find_path(char *, char **);

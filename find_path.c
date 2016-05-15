@@ -40,7 +40,7 @@ char *find_path(char *cmd, char **env) {
         for(i = 0; arr[i] != '\0'; ++i) {
                 dir = opendir(arr[i]);
                 while((dir_search = readdir(dir)) != NULL) {
-                        if (strcmp(dir_search->d_name, cmd) == 0) {
+                        if (str_cmp(dir_search->d_name, cmd) == 0) {
                                 arr[i] = concat_strings(arr[i], "/");
                                 return concat_strings(arr[i], cmd);
                         }
@@ -72,7 +72,7 @@ char *get_env_var(char *var, char **env) {
         for(loc = 0; env[loc] != '\0'; loc++) {
                 for(j = 0; j < len; ++j) {
                         var_str[j] = env[loc][j];
-                } if(strcmp(var, var_str) == 0)
+                } if(str_cmp(var, var_str) == 0)
                         break;
                 if(env[loc + 1] == '\0')
                         return NULL;
