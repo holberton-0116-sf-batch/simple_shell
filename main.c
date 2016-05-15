@@ -4,7 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "header.h"
+#include <dirent.h>
 #include "libshell/libshell.h"
+
+#define BUFFER_SIZE 100
 
 /*
  * Takes arguments from command line and locates them in PATH.
@@ -14,88 +17,48 @@
  *
  * Return: 0 on success, 1 on failure.
  */
+int main(int argc, __attribute__((unused)) char **argv, char **env) {
+	pid_t pid;
+	int status;
+	/*char *path_to_exec;*/
+	char *raw_str;
+	char **exec_argv;
+	int exec_size; 		/* how many strings in the array */
 
-int main(int argc, char **argv, char **env) {
 
-        pid_t pid;
-        int status;
-        char *exec_argv[] = {NULL, NULL, NULL};
-
-        if (argc != 1) {
+	if (argc != 1) { 	/* usage */
 		return 1;
-        }
-
-	print_char('$');
-	print_char(' ');
-
-	exec_argv[0] = concat_strings("/bin/", argv[1]); /* add path for convenience */
-        exec_argv[1] = argv[2];
-
-        /* Test */
-        printf("the string is: %s\n", argv[2]);
-        printf("the command is: %s\n", argv[1]);
-	printf("concat test: %s\n", concat_strings("hello", "world"));
-
-        if ((pid = fork()) == -1) {
-                perror("fork");
-                return 1;
-        } else if (pid == 0) {
-                execve(exec_argv[0], exec_argv, env);
-        } else {
-                wait(&status);
-                printf("Child process terminated.\n");
-        }
-
-        return 0;
-}
-
-/*
- * concat_strings() - Take two strings and concatenate them.
- * @s1: The first string.
- * @s2: The second string.
- *
- * Return: The pointer with the concatentated string.
- */
-char *concat_strings(char *s1, char *s2)
-{
-        int i, j;
-	char *p;
-
-	p = malloc( sizeof(char) * ( str_len(s1) + str_len(s2) ) + 1 ); /* allocate memory */
-
-	if (p == NULL) {		/* memory allocation check */
-		perror("malloc");
-		return "Not enough memory allocated.";
 	}
 
-	j = 0;
+	while (1) {
+		print_prompt();
+		raw_str = read_line(0);
+		exec_argv = string_split(raw_str, ' ');
+		free(raw_str); 	/* frees the memory allocated in read_line() */
+		exec_size = grid_size(exec_argv); /* how many strings in the array */
+		/* printf("Size of exec_argv: %d\n", exec_size); */
 
-        for (i = 0; s1[i] != '\0'; ++i) { /* here we copy the first string onto p */
-                p[j] = s1[i];
-                ++j;
-        }
+		if (str_cmp(exec_argv[0], "exit") == 0)
+			break;
 
-        for (i = 0; s2[i] != '\0'; ++i) { /* here we append the 2nd string onto p */
-                p[j] = s2[i];
-                ++j;
-        }
 
-	p[j] = '\0';		/* append null character at the end */
 
-        return p;
-}
+		if ((pid = fork()) == -1) {
+			perror("fork");
+			return 1;
+		} else if (pid == 0) {
+			execve(raw_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
+			perror("execve");
+			free(raw_str);
+			free_grid(exec_argv, exec_size);
+			return -1; /* child process returns this */
+		} else {
+			wait(&status);
+		}
 
-int str_len(char *str)
-{
-        int i;			/* i used as a counter */
+		free_grid(exec_argv, exec_size);
+	}
 
-        i = 0;			/* initialize at 0 */
-
-        while (*str != '\0') 		/* while string isn't over */
-        {
-                i++;			/* increase counter */
-                str++;			/* pointer arithmetic for next char */
-        }
-
-        return i;
+	free_grid(exec_argv, exec_size);
+	return 0;
 }
