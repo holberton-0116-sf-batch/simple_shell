@@ -40,13 +40,13 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 
 	/* memory leak is happening inside this if statement */
 	if (strcmp(exec_argv[0], "exit") != 0) {
-		exec_argv[0] = concat_strings("/bin/", exec_argv[0]);
-
 		if ((pid = fork()) == -1) {
 			perror("fork");
 			return 1;
 		} else if (pid == 0) {
+			exec_argv[0] = concat_strings("/bin/", exec_argv[0]);
 			execve(exec_argv[0], exec_argv, env);
+			free_grid(exec_argv, exec_size);
 		} else {
 			wait(&status);
 		}
