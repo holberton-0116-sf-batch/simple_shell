@@ -25,7 +25,6 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 	char **exec_argv;
 	int exec_size; 		/* how many strings in the array */
 
-
 	if (argc != 1) { 	/* usage */
 		return 1;
 	}
@@ -40,14 +39,13 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 
 		if (str_cmp(exec_argv[0], "exit") == 0)
 			break;
-
-
-
-		if ((pid = fork()) == -1) {
+		if (str_cmp(exec_argv[0], "cd") == 0) {
+			ch_dir(exec_argv[1]);
+		} else if ((pid = fork()) == -1) {
 			perror("fork");
 			return 1;
 		} else if (pid == 0) {
-			execve(raw_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
+			execve(raw_str = find_path(exec_argv[0], env), exec_argv, env);
 			perror("execve");
 			free(raw_str);
 			free_grid(exec_argv, exec_size);
@@ -55,10 +53,8 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 		} else {
 			wait(&status);
 		}
-
 		free_grid(exec_argv, exec_size);
 	}
-
 	free_grid(exec_argv, exec_size);
 	return 0;
 }
