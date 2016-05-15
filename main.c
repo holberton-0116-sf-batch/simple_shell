@@ -36,7 +36,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 	exec_argv = string_split(raw_str, ' ');
 	free(raw_str); 	/* frees the memory allocated in read_line() */
 	exec_size = grid_size(exec_argv); /* how many strings in the array */
-	printf("Size of exec_argv: %d\n", exec_size);
+	/* printf("Size of exec_argv: %d\n", exec_size); */
 
 	/* memory leak is happening inside this if statement */
 	if (strcmp(exec_argv[0], "exit") != 0) {
