@@ -30,45 +30,51 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 		return 1;
 	}
 
-	print_prompt();
-	raw_str = read_line(0);
-	exec_argv = string_split(raw_str, ' ');
-	free(raw_str); 	/* frees the memory allocated in read_line() */
-	exec_size = grid_size(exec_argv); /* how many strings in the array */
-	/* printf("Size of exec_argv: %d\n", exec_size); */
+	while (1) {
+		print_prompt();
+		raw_str = read_line(0);
+		exec_argv = string_split(raw_str, ' ');
+		free(raw_str); 	/* frees the memory allocated in read_line() */
+		exec_size = grid_size(exec_argv); /* how many strings in the array */
+		/* printf("Size of exec_argv: %d\n", exec_size); */
 
-	/* memory leak is happening inside this if statement */
-	if (strcmp(exec_argv[0], "exit") != 0) {
+		if (strcmp(exec_argv[0], "exit") == 0)
+			break;
+
 		if ((pid = fork()) == -1) {
 			perror("fork");
 			return 1;
 		} else if (pid == 0) {
 			exec_argv[0] = concat_strings("/bin/", exec_argv[0]);
-			execve(exec_argv[0], exec_argv, env);
-			free_grid(exec_argv, exec_size);
+			if (execve(exec_argv[0], exec_argv, env) == -1)
+			{
+				perror("execve");
+				return 2;
+			}
 		} else {
 			wait(&status);
 		}
+
+		free_grid(exec_argv, exec_size);
 	}
 
 	free_grid(exec_argv, exec_size);
-
 	return 0;
 }
 
 int str_len(char *str)
 {
-        int i;			/* i used as a counter */
+	int i;			/* i used as a counter */
 
-        i = 0;			/* initialize at 0 */
+	i = 0;			/* initialize at 0 */
 
-        while (*str != '\0')	/* while string isn't over */
-        {
-                i++;		/* increase counter */
-                str++;		/* pointer arithmetic for next char */
-        }
+	while (*str != '\0')	/* while string isn't over */
+	{
+		i++;		/* increase counter */
+		str++;		/* pointer arithmetic for next char */
+	}
 
-        return i;
+	return i;
 }
 
 /* determines size of a grid of characters (array of strings) */
@@ -78,25 +84,25 @@ int grid_size(char **grid)
 
 	i = 0;
 
-        while (*grid != NULL) 	/* until there is no pointer */
-        {
-                i++;	     /* increase counter */
-                grid++;     /* pointer arithmetic for next pointer */
-        }
+	while (*grid != NULL) 	/* until there is no pointer */
+	{
+		i++;	     /* increase counter */
+		grid++;     /* pointer arithmetic for next pointer */
+	}
 
 	return i;
 }
 
 int *print_prompt(){
-        int i;
-        char *prompt = "GreenShell$ ";
+	int i;
+	char *prompt = "GreenShell$ ";
 
-        i = 0;
-        while (prompt[i] != '\0') {
-                print_char(prompt[i]);
-                ++i;
-        }
-        return 0;
+	i = 0;
+	while (prompt[i] != '\0') {
+		print_char(prompt[i]);
+		++i;
+	}
+	return 0;
 }
 
 int strcmp(char *s1, char *s2)
