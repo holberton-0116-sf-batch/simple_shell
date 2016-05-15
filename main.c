@@ -45,12 +45,11 @@ int main(int argc, __attribute__((unused)) char **argv, char **env) {
 			perror("fork");
 			return 1;
 		} else if (pid == 0) {
-			exec_argv[0] = concat_strings("/bin/", exec_argv[0]);
-			execve(exec_argv[0], exec_argv, env);
+			execve(raw_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
 			perror("execve");
+			free(raw_str);
 			free_grid(exec_argv, exec_size);
 			return -1; /* child process returns this */
-		
 		} else {
 			wait(&status);
 		}
