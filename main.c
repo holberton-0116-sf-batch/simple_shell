@@ -18,104 +18,47 @@
  * Return: 0 on success, 1 on failure.
  */
 int main(int argc, __attribute__((unused)) char **argv, char **env) {
-        pid_t pid;
-        int status;
-        char c;
-        char *path_to_exec;
-        char *raw_str;
-        int i = 0;
-        char **exec_argv;
-        char *path_to_home;
-        path_to_home = get_env_var("HOME", env);
+	pid_t pid;
+	int status;
+	/*char *path_to_exec;*/
+	char *raw_str;
+	char **exec_argv;
+	int exec_size; 		/* how many strings in the array */
 
-        if (argc != 1) {
+
+	if (argc != 1) { 	/* usage */
 		return 1;
-        }
+	}
 
-        raw_str = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	while (1) {
+		print_prompt();
+		raw_str = read_line(0);
+		exec_argv = string_split(raw_str, ' ');
+		free(raw_str); 	/* frees the memory allocated in read_line() */
+		exec_size = grid_size(exec_argv); /* how many strings in the array */
+		/* printf("Size of exec_argv: %d\n", exec_size); */
 
-        print_prompt();
+		if (str_cmp(exec_argv[0], "exit") == 0)
+			break;
 
-        while(read(0, &c, 1)) {
-                if(c == '\n') {
 
-                        raw_str[i] = '\0';
-                        exec_argv = string_split(raw_str, ' ');
-                        if (strcmp(exec_argv[0], "exit") == 0) {
-				if (exec_argv[1] != NULL)
-					return atoi(exec_argv[1]);
-				return 0;
 
-			} if ((path_to_exec = find_path(exec_argv[0], env)) != NULL) {
+		if ((pid = fork()) == -1) {
+			perror("fork");
+			return 1;
+		} else if (pid == 0) {
+			execve(raw_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
+			perror("execve");
+			free(raw_str);
+			free_grid(exec_argv, exec_size);
+			return -1; /* child process returns this */
+		} else {
+			wait(&status);
+		}
 
-                                if ((pid = fork()) == -1) {
-                                        perror("fork");
-                                        return 1;
-                                } else if (pid == 0) {
-                                        execve(path_to_exec, exec_argv, env);
-                                } else {
-                                        wait(&status);
-                                }
-                                print_prompt();
-                                i = 0;
-                                read(0, &c, 1);
-                        } if (path_to_exec == NULL) {
-                                if (strcmp(exec_argv[0], "cd") == 0) {
-                                        if(exec_argv[1] == NULL) {
-                                                ch_dir(path_to_home);
-                                        } else if(exec_argv[1] != NULL) {
-                                                ch_dir(exec_argv[1]);
-                                        }
-                                }
-                                print_prompt();
-                                i = 0;
-                                read(0, &c, 1);
-                        }
-                }
-                raw_str[i] = c;
-                ++i;
-        }
-        return 0;
-}
+		free_grid(exec_argv, exec_size);
+	}
 
-int str_len(char *str)
-{
-        int i;			/* i used as a counter */
-
-        i = 0;			/* initialize at 0 */
-
-        while (*str != '\0') 		/* while string isn't over */
-        {
-                i++;			/* increase counter */
-                str++;			/* pointer arithmetic for next char */
-        }
-
-        return i;
-}
-
-int *print_prompt(){
-        int i;
-        char *prompt = "GreenShell$ ";
-
-        i = 0;
-        while (prompt[i] != '\0') {
-                print_char(prompt[i]);
-                ++i;
-        }
-        return 0;
-}
-
-int strcmp(char *s1, char *s2)
-{
-  int i = 0;
-  int j = 0;
-  for ( ; s1[i] != '\0'; i++)
-  {
-  	if (s1[j] != s2[j]) /* if chars are different, break */
-	  {
-	    break;
-	  }
-	  j++;
-  }
-  return(s1[j] - s2[j]); /* return difference in chars */
+	free_grid(exec_argv, exec_size);
+	return 0;
 }
