@@ -17,8 +17,8 @@
  *
  * Return: 0 on success, 1 on failure.
  */
-int main(int argc, __attribute__((unused)) char **argv, char **env) {
-
+int main(int argc, __attribute__((unused)) char **argv, char **env)
+{
 	pid_t pid;
 	int status;
 	/*char *path_to_exec;*/
