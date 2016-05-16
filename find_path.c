@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include "libshell/libshell.h"
 
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 200
 
 /*
  * find_path() - Takes a command and searches the environmental variable
@@ -26,6 +26,7 @@ char *find_path(char *cmd, char **env) {
         char *path;
         char **arr;
         int i;
+        int exec_size;
 
         /*
          * Retrieve the value of the env variable PATH, then split it into
@@ -34,6 +35,7 @@ char *find_path(char *cmd, char **env) {
          */
         path = get_env_var("PATH", env);
         arr = string_split(path, ':');
+        exec_size = grid_size(arr); /* how many strings in the array */
         free(path);
 
         /* Increment through the path array, searching within dirs. */
@@ -42,10 +44,13 @@ char *find_path(char *cmd, char **env) {
                 while((dir_search = readdir(dir)) != NULL) {
                         if (str_cmp(dir_search->d_name, cmd) == 0) {
                                 arr[i] = concat_strings(arr[i], "/");
+                                closedir(dir);
                                 return concat_strings(arr[i], cmd);
                         }
                 }
+                closedir(dir);
         }
+        free_grid(arr, exec_size);
         return NULL;
 }
 
