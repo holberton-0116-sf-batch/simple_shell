@@ -9,6 +9,8 @@
 
 #define BUFFER_SIZE 100
 
+char *str_copy(char *, int);
+
 /*
  * find_path() - Takes a command and searches the environmental variable
  * PATH for the command name.
@@ -25,8 +27,7 @@ char *find_path(char *cmd, char **env) {
         struct dirent *dir_search;
         char *path;
         char **arr;
-        int i;
-        int exec_size;
+        int i, exec_size;
 
         /*
          * Retrieve the value of the env variable PATH, then split it into
@@ -35,12 +36,15 @@ char *find_path(char *cmd, char **env) {
          */
         path = get_env_var("PATH", env);
         arr = string_split(path, ':');
-        exec_size = grid_size(arr); /* how many strings in the array */
+        exec_size = grid_size(arr);
         free(path);
 
         /* Increment through the path array, searching within dirs. */
         for(i = 0; arr[i] != '\0'; ++i) {
-                dir = opendir(arr[i]);
+                if ((dir = opendir(arr[i])) == NULL) {
+                        perror("opendir");
+                        return NULL;
+                }
                 while((dir_search = readdir(dir)) != NULL) {
                         if (str_cmp(dir_search->d_name, cmd) == 0) {
                                 arr[i] = concat_strings(arr[i], "/");
@@ -77,6 +81,7 @@ char *get_env_var(char *var, char **env) {
         for(loc = 0; env[loc] != '\0'; loc++) {
                 for(j = 0; j < len; ++j) {
                         var_str[j] = env[loc][j];
+                        var_str[j + 1] = '\0';
                 } if(str_cmp(var, var_str) == 0)
                         break;
                 if(env[loc + 1] == '\0')
@@ -89,5 +94,27 @@ char *get_env_var(char *var, char **env) {
         for(i = 0; env[loc][i + (len + 1)] != '\0'; i++) {
                 val[i] = env[loc][i + (len + 1)];
         }
+        val[i] = '\0';
+
         return val;
+}
+
+char *str_copy(char *src, int length)
+{
+  int i;
+  char *dest;
+
+  /* Allocate the same amount of memory as the original string. */
+  dest = malloc(sizeof(char) * (length + 1));
+
+  /* Handle a failed memory allocation. */
+  if (dest == NULL)
+    return (NULL);
+
+  /* Copy the string. */
+  for(i = 0; i < length; ++i){
+    dest[i] = src[i];
+  }
+
+  return(dest);
 }
