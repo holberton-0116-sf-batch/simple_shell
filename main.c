@@ -38,8 +38,6 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
                 exec_argv = prompt();
                 /* obtain how many strings in the array */
 		exec_size = grid_size(exec_argv);
-                /* Print for debugging purposes */
-		/* printf("Size of exec_argv: %d\n", exec_size); */
 
 		if (str_cmp(exec_argv[0], "exit") == 0)
 			break;
@@ -72,14 +70,20 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 
 char **prompt(void)
 {
-        char *raw_str;
-        char **exec_argv;
+        char *raw_str, **exec_argv;
 
-        print_prompt();
-        raw_str = read_line(0);
-        exec_argv = string_split(raw_str, ' ');
-        /* frees the memory allocated in read_line() */
-        free(raw_str);
+        /* keep prompting the user until something is entered */
+        while (1) {
+                print_prompt();
+                raw_str = read_line(0);
+                if (str_len(raw_str) != 0) {
+                        exec_argv = string_split(raw_str, ' ');
+                        /* frees the memory allocated in read_line() */
+                        free(raw_str);
+                        break;
+                }
+        }
+
         return exec_argv;
 }
 
