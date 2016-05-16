@@ -19,14 +19,18 @@
  */
 int main(int argc, __attribute__((unused)) char **argv, char **env)
 {
+        /* 
+         * @exec_size stores how many strings in the array exec_argv
+         */
 	pid_t pid;
-	int status;
+	int status, exec_size;
 	/*char *path_to_exec;*/
 	char *raw_str;
 	char **exec_argv;
-	int exec_size; 		/* how many strings in the array */
 
-	if (argc != 1) { 	/* usage */
+ 	/* check usage */
+	if (argc != 1) {
+                printf("This shell takes no arguments.\n");
 		return 1;
 	}
 
@@ -34,8 +38,11 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 		print_prompt();
 		raw_str = read_line(0);
 		exec_argv = string_split(raw_str, ' ');
-		free(raw_str); 	/* frees the memory allocated in read_line() */
-		exec_size = grid_size(exec_argv); /* how many strings in the array */
+                /* frees the memory allocated in read_line() */
+		free(raw_str);
+                /* obtain how many strings in the array */
+		exec_size = grid_size(exec_argv);
+                /* Print for debugging purposes */
 		/* printf("Size of exec_argv: %d\n", exec_size); */
 
 		if (str_cmp(exec_argv[0], "exit") == 0)
@@ -49,7 +56,8 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 			perror("execve");
 			free(raw_str);
 			free_grid(exec_argv, exec_size);
-			return -1; /* child process returns this */
+                        /* If execve fails, this child process returns -1 */
+			return -1;
 		} else {
 			wait(&status);
 		}
