@@ -20,26 +20,22 @@
 int main(int argc, __attribute__((unused)) char **argv, char **env)
 {
         /* 
-         * @exec_size stores how many strings in the array exec_argv
+         * @exec_argv stores the array of commands to be executed
+         * @exec_size stores the number of strings in the array exec_argv
          */
 	pid_t pid;
 	int status, exec_size;
 	/*char *path_to_exec;*/
-	char *raw_str;
+	char *concat_str;
 	char **exec_argv;
 
  	/* check usage */
-	if (argc != 1) {
-                printf("This shell takes no arguments.\n");
-		return 1;
-	}
+        if (usage(argc))
+                return 1;
 
 	while (1) {
-		print_prompt();
-		raw_str = read_line(0);
-		exec_argv = string_split(raw_str, ' ');
-                /* frees the memory allocated in read_line() */
-		free(raw_str);
+                /* prompt the user and obtain commands */
+                exec_argv = prompt();
                 /* obtain how many strings in the array */
 		exec_size = grid_size(exec_argv);
                 /* Print for debugging purposes */
@@ -52,9 +48,9 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 			perror("fork");
 			return 1;
 		} else if (pid == 0) {
-			execve(raw_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
+			execve(concat_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
 			perror("execve");
-			free(raw_str);
+			free(concat_str);
 			free_grid(exec_argv, exec_size);
                         /* If execve fails, this child process returns -1 */
 			return -1;
@@ -67,4 +63,32 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 
 	free_grid(exec_argv, exec_size);
 	return 0;
+}
+
+/* 
+ * This function prompts the user for input and returns a parsed array of
+ * strings to be executed.
+ */
+
+char **prompt(void)
+{
+        char *raw_str;
+        char **exec_argv;
+
+        print_prompt();
+        raw_str = read_line(0);
+        exec_argv = string_split(raw_str, ' ');
+        /* frees the memory allocated in read_line() */
+        free(raw_str);
+        return exec_argv;
+}
+
+char usage(char argc)
+{
+	if (argc != 1) {
+                printf("This shell takes no arguments.\n");
+		return 1;
+	}
+
+        return 0;
 }
