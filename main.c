@@ -34,7 +34,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
                 return 1;
 
 	while (1) {
-                /* prompt the user and obtain commands */
+                /* obtain commands entered by the user */
                 exec_argv = prompt();
                 /* obtain how many strings in the array */
 		exec_size = grid_size(exec_argv);
@@ -64,8 +64,9 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 }
 
 /* 
- * This function prompts the user for input and returns a parsed array of
- * strings to be executed.
+ * This function handles the prompt until the user enters a command. Upon
+ * receiving commands from the user, it returns the an array of strings
+ * containing the command.
  */
 
 char **prompt(void)
@@ -80,11 +81,9 @@ char **prompt(void)
                         exec_argv = string_split(raw_str, ' ');
                         /* frees the memory allocated in read_line() */
                         free(raw_str);
-                        break;
+                        return exec_argv;
                 }
         }
-
-        return exec_argv;
 }
 
 char usage(char argc)
