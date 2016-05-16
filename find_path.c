@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include "libshell/libshell.h"
 
-#define BUFFER_SIZE 200
+#define BUFFER_SIZE 100
 
 /*
  * find_path() - Takes a command and searches the environmental variable

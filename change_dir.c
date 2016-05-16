@@ -18,6 +18,7 @@
  * errno is set appropriately.
  */
 int ch_dir(char *path, char **env) {
+        char *tmp;
         /*
          * Add code to track the "previous working directory" with set_env()
          * every time this function is called. Then, if `cd -` is used,
@@ -25,12 +26,18 @@ int ch_dir(char *path, char **env) {
          * code below.
          */
 
-         /* setenv(OLDPWD) = get_env_var("PWD", env) */
+        /* setenv("OLDPWD") = get_env_var("PWD", env) */
         if (path == NULL) {
                 path = get_env_var("HOME", env);
+                tmp = path;
+                free(path);
+                return chdir(tmp);
         } else if (*path == '-') {
-                printf("%s\n", "Dash entered.");
-                /* path = get_env_var("OLDPWD", env) */
+                path = get_env_var("OLDPWD", env);
+                tmp = path;
+                free(path);
+                return chdir(tmp);
         }
+        /* setenv("PWD") = get_env_var(path, env) */
         return chdir(path);
 }
