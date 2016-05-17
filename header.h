@@ -11,3 +11,4 @@ void free_grid(char **, int);
 int grid_size(char **);
 char **prompt(void);
 char usage(char);
+char *get_env_value(char *var, char **env);
