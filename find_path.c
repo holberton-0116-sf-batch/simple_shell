@@ -9,8 +9,6 @@
 
 #define BUFFER_SIZE 100
 
-char *str_copy(char *, int);
-
 /*
  * find_path() - Takes a command and searches the environmental variable
  * PATH for the command name.
@@ -32,9 +30,9 @@ char *find_path(char *cmd, char **env) {
         /*
          * Retrieve the value of the env variable PATH, then split it into
          * an array based on the colon separator. Free memory allocated in
-         * get_env_var function.
+         * get_env_value function.
          */
-        path = get_env_var("PATH", env);
+        path = get_env_value("PATH", env);
         arr = string_split(path, ':');
         exec_size = grid_size(arr);
         free(path);
@@ -59,30 +57,43 @@ char *find_path(char *cmd, char **env) {
 }
 
 /*
- * get_env_var() - Takes an environmental variable and searches for its
+ * get_env_value() - Takes an environment variable and searches for its
  * existence. If found it will return the value of that variable.
  * @var: The environmental variable to be found (e.g., "PATH");
  * @env: The parent process environment.
  *
- * Return: The value of the variable, if it exists. NULL if it does
+ * Return: The value of the variable, if the variable exists. NULL if it does
  * not exist.
  */
-char *get_env_var(char *var, char **env) {
-        char *var_str;
+char *get_env_value(char *var, char **env) {
+        char *var_name;
+        char **var_strings;
         char *val;
-        int i, j, len, loc;
+        int i, j, loc;
 
-        var_str = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-        val = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+        /* val = malloc(sizeof(char) * (BUFFER_SIZE + 1)); */
 
-        len = str_len(var);
-
-        /* Find the location of the variable in the env array. */
+        /* Find the location of the variable in the env arr. */
         for(loc = 0; env[loc] != '\0'; loc++) {
-                for(j = 0; j < len; ++j) {
-                        var_str[j] = env[loc][j];
-                        var_str[j + 1] = '\0';
-                } if(str_cmp(var, var_str) == 0)
+                /* var_name[0] will be the var name we are getting. */
+                var_strings = string_split(env[loc], '=');
+                var_name = var_strings[0];
+                free_grid(var_name);
+
+                if (grid_size(var_strings) > 2) {
+                        /* The values here have an equal sign */
+                        printf("%s\n", "Values here have an equal sign.");
+                }
+                /*
+                 * Obtain the value of the variable, and copy
+                 * it onto var_str.
+                 */
+                for(j = 0; var_strings[j] != '\0'; ++j) {
+                        var_name[j] = env[loc][j];
+                        var_name[j + 1] = '\0';
+                }
+
+                if(str_cmp(var, var_str) == 0)
                         break;
                 if(env[loc + 1] == '\0')
                         return NULL;
@@ -97,24 +108,4 @@ char *get_env_var(char *var, char **env) {
         val[i] = '\0';
 
         return val;
-}
-
-char *str_copy(char *src, int length)
-{
-  int i;
-  char *dest;
-
-  /* Allocate the same amount of memory as the original string. */
-  dest = malloc(sizeof(char) * (length + 1));
-
-  /* Handle a failed memory allocation. */
-  if (dest == NULL)
-    return (NULL);
-
-  /* Copy the string. */
-  for(i = 0; i < length; ++i){
-    dest[i] = src[i];
-  }
-
-  return(dest);
 }
