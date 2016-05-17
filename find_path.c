@@ -68,8 +68,8 @@ char *find_path(char *cmd, char **env) {
 char *get_env_value(char *var, char **env) {
         char *var_name;
         char **var_strings;
-        char *val;
-        int i, j, loc;
+        char *var_value;
+        int i, loc;
 
         /* val = malloc(sizeof(char) * (BUFFER_SIZE + 1)); */
 
@@ -78,34 +78,43 @@ char *get_env_value(char *var, char **env) {
                 /* var_name[0] will be the var name we are getting. */
                 var_strings = string_split(env[loc], '=');
                 var_name = var_strings[0];
-                free_grid(var_name);
 
                 if (grid_size(var_strings) > 2) {
                         /* The values here have an equal sign */
                         printf("%s\n", "Values here have an equal sign.");
                 }
-                /*
-                 * Obtain the value of the variable, and copy
-                 * it onto var_str.
-                 */
-                for(j = 0; var_strings[j] != '\0'; ++j) {
-                        var_name[j] = env[loc][j];
-                        var_name[j + 1] = '\0';
-                }
 
-                if(str_cmp(var, var_str) == 0)
+                free_grid(var_strings);
+
+                if(str_cmp(var, var_name) == 0)
                         break;
+                /* 
+                 * if the variable name is not found in path, return
+                 * NULL (memory address 0)
+                 */
                 if(env[loc + 1] == '\0')
                         return NULL;
         }
 
         free(var_str);
 
-        /* Store the value of the env variable to be returned. */
-        for(i = 0; env[loc][i + (len + 1)] != '\0'; i++) {
-                val[i] = env[loc][i + (len + 1)];
+        /*
+         * Obtain the value of the variable, and copy
+         * it onto var_value.
+         */
+        for(i = str_len(var_name) - 1; env[loc][i] != '\0'; i++) {
+                var_value[i] = env[loc][i];
         }
-        val[i] = '\0';
+                
+        var_value[i + 1] = '\0';
 
-        return val;
+        /* /\* Store the value of the env variable to be returned. *\/ */
+        /* for(i = 0; env[loc][i + (len + 1)] != '\0'; i++) { */
+        /*         val[i] = env[loc][i + (len + 1)]; */
+        /* } */
+        /* val[i] = '\0'; */
+
+        /* return val; */
+
+        return var_value;
 }
