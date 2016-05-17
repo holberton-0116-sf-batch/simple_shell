@@ -26,7 +26,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 	pid_t pid;
 	int status, exec_size;
 	/*char *path_to_exec;*/
-	char *concat_str;
+	/* char *concat_str; */
 	char **exec_argv;
 
  	/* check usage */
@@ -62,9 +62,8 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 		} else if (pid == 0) {
                         /* CHILD PROCESS */
 
-                        execve(concat_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
+                        execve(find_path(exec_argv[0], env), exec_argv, env);
 			perror("execve");
-			free(concat_str);
 			free_grid(exec_argv, exec_size);
                         /* If execve fails, this child process returns 3 */
 			return 3;
