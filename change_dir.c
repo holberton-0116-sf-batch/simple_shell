@@ -9,16 +9,35 @@
 
 /*
  * ch_dir() - Takes a path as parameter and uses the Linux builtin function
- * chdir to change the process to that directory. Currently, it is not able
- * to handle using the `get_env_var()` function because it is called within
- * a child process, so to change directory into the user's home requires using
- * the function in the parent process and passing the returned value of
- * `get_env_var()` to this function.
+ * chdir to change the process to that directory. If the path is NULL, the
+ * path is set to the user's home directory.
  * @path: The path to change directories to.
+ * @env: The user's environment.
  *
- * Return: On success, zero is returned.  On error, -1 is returned, and
+ * Return: On success, zero is returned. On error, -1 is returned, and
  * errno is set appropriately.
  */
-int ch_dir(char *path) {
-        return(chdir(path));
+int ch_dir(char *path, char **env) {
+        char *tmp;
+        /*
+         * Add code to track the "previous working directory" with set_env()
+         * every time this function is called. Then, if `cd -` is used,
+         * the path will be set to this environmental variable. See placeholder
+         * code below.
+         */
+
+        /* setenv("OLDPWD") = get_env_var("PWD", env) */
+        if (path == NULL) {
+                path = get_env_var("HOME", env);
+                tmp = path;
+                free(path);
+                return chdir(tmp);
+        } else if (*path == '-') {
+                path = get_env_var("OLDPWD", env);
+                tmp = path;
+                free(path);
+                return chdir(tmp);
+        }
+        /* setenv("PWD") = get_env_var(path, env) */
+        return chdir(path);
 }
