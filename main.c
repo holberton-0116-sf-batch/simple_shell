@@ -50,8 +50,9 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
                                 return atoi(exec_argv[1]);
                 }
 
-                if (str_cmp(exec_argv[0], "echo") == 0 && str_cmp(exec_argv[1], "$?") == 0)
-                        printf("%d\n", status);
+                /* handle the $? variable */
+                if (WIFEXITED(status))
+                        replace_expr("$?", WEXITSTATUS(status), exec_argv);
 
                 /* linux OS command */
 
@@ -60,6 +61,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 			return 2;
 		} else if (pid == 0) {
                         /* CHILD PROCESS */
+
                         execve(concat_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
 			perror("execve");
 			free(concat_str);
@@ -68,7 +70,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 			return 3;
 		} else {
                         /* PARENT PROCESS */
-			wait(&status);
+                        wait(&status);
 		}
 
 		free_grid(exec_argv, exec_size);
@@ -104,9 +106,21 @@ char **prompt(void)
 char usage(int argc, int expected, char *str)
 {
 	if (argc != expected) {
-                printf("%s", str);
+                print_string(str);
 		return 1;
 	}
 
         return 0;
+}
+
+void replace_expr(char *expr, int value, char **exec_argv)
+{
+        int i;
+
+        for (i = 0; i < grid_size(exec_argv); i++) {
+                if (str_cmp(exec_argv[i], expr) == 0) {
+                        free(exec_argv[i]);
+                        exec_argv[i] = int_to_string(value);
+                }
+        }
 }
