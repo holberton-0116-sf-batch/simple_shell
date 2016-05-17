@@ -36,7 +36,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 	while (1) {
                 /* obtain commands entered by the user */
                 exec_argv = prompt();
-                /* obtain how many strings in the array */
+                /* obtain number of strings in the array */
 		exec_size = grid_size(exec_argv);
 
 		if (str_cmp(exec_argv[0], "exit") == 0)
