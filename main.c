@@ -30,7 +30,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 	char **exec_argv;
 
  	/* check usage */
-        if (usage(argc))
+        if (usage(argc, 1, "No args please.\n"))
                 return 1;
 
 	while (1) {
@@ -39,20 +39,35 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
                 /* obtain number of strings in the array */
 		exec_size = grid_size(exec_argv);
 
-		if (str_cmp(exec_argv[0], "exit") == 0)
-			break;
+                /* built-in command function */
+
+		if (str_cmp(exec_argv[0], "exit") == 0) {
+                        if (grid_size(exec_argv) == 1)
+                                break;
+                        if(usage(grid_size(exec_argv), 2, "Too many args for exit status. Returning 1.\n"))
+                                return 1;
+                        else
+                                return atoi(exec_argv[1]);
+                }
+
+                if (str_cmp(exec_argv[0], "echo") == 0 && str_cmp(exec_argv[1], "$?") == 0)
+                        printf("%d\n", status);
+
+                /* linux OS command */
 
 		if ((pid = fork()) == -1) {
 			perror("fork");
-			return 1;
+			return 2;
 		} else if (pid == 0) {
-			execve(concat_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
+                        /* CHILD PROCESS */
+                        execve(concat_str = concat_strings("/bin/", exec_argv[0]), exec_argv, env);
 			perror("execve");
 			free(concat_str);
 			free_grid(exec_argv, exec_size);
-                        /* If execve fails, this child process returns -1 */
-			return -1;
+                        /* If execve fails, this child process returns 3 */
+			return 3;
 		} else {
+                        /* PARENT PROCESS */
 			wait(&status);
 		}
 
@@ -86,10 +101,10 @@ char **prompt(void)
         }
 }
 
-char usage(char argc)
+char usage(int argc, int expected, char *str)
 {
-	if (argc != 1) {
-                printf("This shell takes no arguments.\n");
+	if (argc != expected) {
+                printf("%s", str);
 		return 1;
 	}
 
