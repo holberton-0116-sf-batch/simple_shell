@@ -5,7 +5,7 @@ int str_cmp(char *, char *);
 int *print_prompt();
 void print_env(char **);
 char *find_path(char *, char **);
-int ch_dir(char *);
+int ch_dir(char *, char **);
 char *get_env_var(char *, char **);
 void free_grid(char **, int);
 int grid_size(char **);

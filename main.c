@@ -19,7 +19,7 @@
  */
 int main(int argc, __attribute__((unused)) char **argv, char **env)
 {
-        /* 
+        /*
          * @exec_argv stores the array of commands to be executed
          * @exec_size stores the number of strings in the array exec_argv
          */
@@ -63,7 +63,7 @@ int main(int argc, __attribute__((unused)) char **argv, char **env)
 	return 0;
 }
 
-/* 
+/*
  * This function handles the prompt until the user enters a command. Upon
  * receiving commands from the user, it returns the an array of strings
  * containing the command.
